@@ -18,7 +18,7 @@ def get_question():
     return jsonify(question_info) ,200
 
 
-@app.route('/get-answer/<ans_id>',methods=['POST'])
+@app.route('/get-answer/<ans_id>',methods=['GET'])
 def get_answer(ans_id):
     cur=db.cursor()
     cur.execute(f"SELECT ANSWER FROM TRIVIAS WHERE Q_ID={ans_id}")
@@ -26,13 +26,26 @@ def get_answer(ans_id):
     answer_info={
         'answer':data[0]
     }
+    cur.close()
     return jsonify(answer_info),200
 
 
-@app.route('/add-question')
+@app.route('/add-question',methods=['POST'])
 def add_question():
-    return 'question'
-
+    data=request.get_json()
+    if 'question' in list(data.keys()) and 'answer' in list(data.keys()):
+        cur=db.cursor()
+        cur.execute("SELECT MAX(Q_ID)+1 FROM TRIVIAS")
+        nxtid=cur.fetchone()[0]
+        cur.execute(f'INSERT INTO TRIVIAS (q_id,question,answer) VALUES ({nxtid},"'+data['question']+'","'+data['answer']+'")')
+        db.commit()
+        cur.close()
+        return jsonify(data) ,201
+    else:
+        errormessage={
+            'error':'Not enough parameters available adding question'
+        }
+        return jsonify(errormessage),400
 
 
 
