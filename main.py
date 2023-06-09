@@ -4,18 +4,39 @@ import mysql.connector as ms
 app=Flask(__name__)
 db=ms.connect(host='localhost',user='root',password='H2A0R0I4',database='TRIVIA')
 
+'''
+
+To do
++ category system
+
+'''
 
 @app.route('/get-question',methods=['GET'])
 def get_question():
+    category=request.args.get("category")
     cur=db.cursor()
-    cur.execute("SELECT Q_ID,QUESTION FROM TRIVIAS ORDER BY RAND() LIMIT 1")
-    data=cur.fetchone()
-    question_info={
-        'id':data[0],
-        'question':data[1]
-    }
-    cur.close()
-    return jsonify(question_info) ,200
+    if category:
+        cur.execute(f"SELECT Q_ID,QUESTION,CATEGORY FROM TRIVIAS WHERE CATEGORY={category} ORDER BY RAND() LIMIT 1")
+        data=cur.fetchone()
+        question_info={
+            'id':data[0],
+            'question':data[1],
+            'category':data[2]
+        }
+        cur.close()
+        return jsonify(question_info),200
+    else:
+        cur=db.cursor()
+        cur.execute("SELECT Q_ID,QUESTION,CATEGORY FROM TRIVIAS ORDER BY RAND() LIMIT 1")
+        data=cur.fetchone()
+        print(data)
+        question_info={
+            'id':data[0],
+            'question':data[1],
+            'category':data[2]
+        }
+        cur.close()
+        return jsonify(question_info) ,200
 
 
 @app.route('/get-answer/<ans_id>',methods=['GET'])
