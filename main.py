@@ -2,15 +2,13 @@ from flask import Flask,request,jsonify
 import mysql.connector as ms
 
 app=Flask(__name__)
+
+#Connection with mysql database
 db=ms.connect(host='localhost',user='root',password='H2A0R0I4',database='TRIVIA')
 
-'''
+#API Routes
 
-To do
-+ category system
-
-'''
-
+#route for getting a TRIVIA questions
 @app.route('/get-question',methods=['GET'])
 def get_question():
     category=request.args.get("category")
@@ -38,7 +36,7 @@ def get_question():
         cur.close()
         return jsonify(question_info) ,200
 
-
+#route for getting answer of questions based on question id
 @app.route('/get-answer/<ans_id>',methods=['GET'])
 def get_answer(ans_id):
     cur=db.cursor()
@@ -50,7 +48,7 @@ def get_answer(ans_id):
     cur.close()
     return jsonify(answer_info),200
 
-
+#route for adding new question
 @app.route('/add-question',methods=['POST'])
 def add_question():
     data=request.get_json()
@@ -58,7 +56,7 @@ def add_question():
         cur=db.cursor()
         cur.execute("SELECT MAX(Q_ID)+1 FROM TRIVIAS")
         nxtid=cur.fetchone()[0]
-        cur.execute(f'INSERT INTO TRIVIAS (q_id,question,answer) VALUES ({nxtid},"'+data['question']+'","'+data['answer']+'")')
+        cur.execute(f'INSERT INTO TRIVIAS (q_id,question,answer,category) VALUES ({nxtid},"'+data['question']+'","'+data['answer']+'","'+data['category']+'")')
         db.commit()
         cur.close()
         return jsonify(data) ,201
